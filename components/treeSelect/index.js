@@ -93,7 +93,35 @@ export default class TreeSelect extends Component {
     return stack;
   };
 
+  _onPressNode = ({ e, item }) => { // eslint-disable-line
+    const { data, selectType, leafCanBeSelected } = this.props;
+    const { currentNode } = this.state;
+    const routes = this._find(data, item.id);
+    this.setState((state) => {
+      const nodesStatus = new Map(state.nodesStatus);
+      // nodesStatus.set(item && item.id, !nodesStatus.get(item && item.id)); // toggle
+      // 计算currentNode的内容
+      if (selectType === 'multiple') {
+        const tempCurrentNode = currentNode.includes(item.id) ?
+          currentNode.filter(nodeid => nodeid !== item.id) : currentNode.concat(item.id)
+        if (leafCanBeSelected) {
+          return { nodesStatus };
+        }
+        return { currentNode: tempCurrentNode, nodesStatus };
+      } else {
+        if (leafCanBeSelected) {
+          return { nodesStatus };
+        }
+        return { currentNode: item.id, nodesStatus };
+      }
+    }, () => {
+      const { onClick } = this.props;
+      onClick && onClick({ item, routes, currentNode: this.state.currentNode });
+    });
+  };
+
   _onPressCollapse = ({ e, item }) => { // eslint-disable-line
+    e.stopPropagation();
     const { data, selectType, leafCanBeSelected } = this.props;
     const { currentNode } = this.state;
     const routes = this._find(data, item.id);
@@ -116,7 +144,7 @@ export default class TreeSelect extends Component {
       }
     }, () => {
       const { onClick } = this.props;
-      onClick && onClick({ item, routes, currentNode: this.state.currentNode });
+      // onClick && onClick({ item, routes, currentNode: this.state.currentNode });
     });
   };
 
@@ -184,7 +212,7 @@ export default class TreeSelect extends Component {
       const isOpen = this.state.nodesStatus && this.state.nodesStatus.get(item && item.id) || false;
       return (
         <View>
-          <TouchableOpacity onPress={(e) => this._onPressCollapse({ e, item })} >
+          <TouchableOpacity onPress={(e) => this._onPressNode({ e, item })} >
             <View style={{
               flexDirection: 'row',
               backgroundColor: !leafCanBeSelected && isCurrentNode ? selectedBackgroudColor || '#FFEDCE' : backgroudColor || '#fff',
@@ -193,7 +221,7 @@ export default class TreeSelect extends Component {
               alignItems: 'center'
             }}
             >
-              { this._renderTreeNodeIcon(isOpen) }
+              <TouchableOpacity onPress={(e) => this._onPressCollapse({ e, item })}>{ this._renderTreeNodeIcon(isOpen) }</TouchableOpacity>
               {
                 isShowTreeId && <Text style={{ fontSize: 14, marginLeft: 4 }}>{item.id}</Text>
               }
