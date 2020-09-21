@@ -233,7 +233,7 @@ export default class TreeSelect extends Component {
             !isOpen ? null :
               <FlatList
                 keyExtractor={(childrenItem, i) => i.toString()}
-                style={{ flex: 1, marginLeft: 15 }}
+                style={{ flex: 1, paddingLeft: 15 }}
                 onEndReachedThreshold={0.01}
                 {...this.props}
                 data={item.children}
@@ -302,11 +302,11 @@ export default class TreeSelect extends Component {
     return (
       <View style={styles.container}>
         {/*{*/}
-        {/*this._renderSearchBar()*/}
+        {/* {this._renderSearchBar()} */}
         {/*}*/}
         <FlatList
           keyExtractor={(item, i) => i.toString()}
-          style={{ flex: 1, marginVertical: 5, paddingHorizontal: 15 }}
+          style={{ flex: 1 }}
           onEndReachedThreshold={0.01}
           {...this.props}
           data={data}
