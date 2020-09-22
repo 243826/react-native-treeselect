@@ -217,7 +217,7 @@ export default class TreeSelect extends Component {
               flexDirection: 'row',
               backgroundColor: !leafCanBeSelected && isCurrentNode ? selectedBackgroudColor || '#FFEDCE' : backgroudColor || '#fff',
               marginBottom: 2,
-              height: 30,
+              height: 45,
               alignItems: 'center'
             }}
             >
@@ -250,7 +250,7 @@ export default class TreeSelect extends Component {
           flexDirection: 'row',
           backgroundColor: isCurrentNode ? selectedBackgroudColor || '#FFEDCE' : backgroudColor || '#fff',
           marginBottom: 2,
-          height: 30,
+          height: 45,
           alignItems: 'center'
         }}
         >
