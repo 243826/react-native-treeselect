@@ -1,6 +1,6 @@
 {
-  "name": "react-native-tree-select",
-  "version": "2.1.0",
+  "name": "react-native-treeselect",
+  "version": "1.0.0",
   "description": "select tree",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -12,7 +12,7 @@
     "url": "git+https://github.com/tvsj/react-native-tree-select.git"
   },
   "dependencies": {
-    "react": "16.3.1",
+    "react": "^16.4.2",
     "react-native": "^0.56.0",
     "react-native-vector-icons": "^6.1.0"
   },
@@ -25,7 +25,7 @@
   "author": "jkwu",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tvsj/react-native-tree-select/issues"
+    "url": "https://github.com/tvsj/react-native-treeselect/issues"
   },
-  "homepage": "https://github.com/tvsj/react-native-tree-select#readme"
+  "homepage": "https://github.com/tvsj/react-native-treeselect#readme"
 }

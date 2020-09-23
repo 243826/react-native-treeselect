@@ -1,13 +1,13 @@
-# react-native-tree-select
+# react-native-treeselect
 
 
-react-native-tree-select
+react-native-treeselect
 树结构选择组件
 
 
 ----
-![The final rendering](https://github.com/suwu150/react-native-tree-select/blob/master/react-native-tree-select.gif?raw=true)
-![The final rendering](https://github.com/suwu150/react-native-tree-select/blob/master/shareComponet.gif?raw=true)
+![The final rendering](https://github.com/suwu150/react-native-treeselect/blob/master/react-native-treeselect.gif?raw=true)
+![The final rendering](https://github.com/suwu150/react-native-treeselect/blob/master/shareComponet.gif?raw=true)
 
 项目结构
 
@@ -27,16 +27,16 @@ Example usage:
  首先能够通过如下命令进行安装
 
 ```$xslt
-npm i react-native-tree-select
+npm i react-native-treeselect
 ```
 然后通过下面命令进行导入：
 ```$xslt
-import TreeSelect from 'react-native-tree-select';
+import TreeSelect from 'react-native-treeselect';
 ```
 如下代码是简单的使用
 
 ```javascript
-import TreeSelect from 'react-native-tree-select';
+import TreeSelect from 'react-native-treeselect';
 
    ...
   render() {
@@ -194,10 +194,10 @@ import TreeSelect from 'react-native-tree-select';
 |treeNodeStyle|指定节点处的图标样式，包含两个属性openIcon，closeIcon,支持传icon和image类型|object|no|null|-|
 
 3.本地运行
-在本地运行，首先得克隆该项目，使用下面命令进行克隆，[克隆地址](https://github.com/suwu150/react-native-tree-select)
+在本地运行，首先得克隆该项目，使用下面命令进行克隆，[克隆地址](https://github.com/suwu150/react-native-treeselect)
   先克隆该项目
   ```
-  git clone https://github.com/suwu150/react-native-tree-select.git
+  git clone https://github.com/suwu150/react-native-treeselect.git
   ```
   然后进入项目，cd treeSelectExample进入到演示项目，通过以下命令安装依赖
   ```
