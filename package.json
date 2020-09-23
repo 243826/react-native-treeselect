@@ -1,5 +1,5 @@
 {
-  "name": "react-native-treeselect",
+  "name": "@charer/react-native-treeselect",
   "version": "1.0.0",
   "description": "select tree",
   "main": "index.js",
@@ -27,5 +27,6 @@
   "bugs": {
     "url": "https://github.com/tvsj/react-native-treeselect/issues"
   },
+ 
   "homepage": "https://github.com/tvsj/react-native-treeselect#readme"
 }
