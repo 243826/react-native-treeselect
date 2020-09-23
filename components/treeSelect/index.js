@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, TextInput, FlatList, Text, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { breadthFirstRecursion } from '../utils/menutransform';
 
 const styles = StyleSheet.create({
@@ -274,29 +273,29 @@ export default class TreeSelect extends Component {
     });
   };
 
-  _renderSearchBar = () => {
-    const { searchValue } = this.state;
-    return (
-      <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 5,
-        borderColor: '#555', marginHorizontal: 10, }}>
-        <TextInput
-          style={{ height: 38, paddingHorizontal: 5, flex: 1 }}
-          value={searchValue}
-          autoCapitalize="none"
-          underlineColorAndroid="transparent"
-          autoCorrect={false}
-          blurOnSubmit
-          clearButtonMode="while-editing"
-          placeholder="搜索节点"
-          placeholderTextColor="#e9e5e1"
-          onChangeText={(text) => this._onChangeText('searchValue', text)}
-        />
-        <TouchableOpacity onPress={this._onSearch}>
-          <Ionicons name="ios-search" style={{ fontSize: 25, marginHorizontal: 5 }} />
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  // _renderSearchBar = () => {
+  //   const { searchValue } = this.state;
+  //   return (
+  //     <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 5,
+  //       borderColor: '#555', marginHorizontal: 10, }}>
+  //       <TextInput
+  //         style={{ height: 38, paddingHorizontal: 5, flex: 1 }}
+  //         value={searchValue}
+  //         autoCapitalize="none"
+  //         underlineColorAndroid="transparent"
+  //         autoCorrect={false}
+  //         blurOnSubmit
+  //         clearButtonMode="while-editing"
+  //         placeholder="搜索节点"
+  //         placeholderTextColor="#e9e5e1"
+  //         onChangeText={(text) => this._onChangeText('searchValue', text)}
+  //       />
+  //       <TouchableOpacity onPress={this._onSearch}>
+  //         <Ionicons name="ios-search" style={{ fontSize: 25, marginHorizontal: 5 }} />
+  //       </TouchableOpacity>
+  //     </View>
+  //   );
+  // }
   render() {
     const { data } = this.props;
     return (

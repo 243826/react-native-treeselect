@@ -13,8 +13,7 @@
   },
   "dependencies": {
     "react": "^16.4.2",
-    "react-native": "^0.56.0",
-    "react-native-vector-icons": "^6.1.0"
+    "react-native": "^0.56.0"
   },
   "keywords": [
     "react-native",
@@ -27,6 +26,6 @@
   "bugs": {
     "url": "https://github.com/tvsj/react-native-treeselect/issues"
   },
- 
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "homepage": "https://github.com/tvsj/react-native-treeselect#readme"
 }
