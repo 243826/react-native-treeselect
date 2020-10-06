@@ -1,6 +1,6 @@
 {
   "name": "@charer/react-native-treeselect",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "select tree",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -12,8 +12,7 @@
     "url": "git+https://github.com/tvsj/react-native-tree-select.git"
   },
   "dependencies": {
-    "react": "^16.4.2",
-    "react-native": "^0.62.0"
+    "react": "^16.4.2"
   },
   "keywords": [
     "react-native",
