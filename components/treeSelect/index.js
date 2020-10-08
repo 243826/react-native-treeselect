@@ -197,7 +197,7 @@ export default class TreeSelect extends Component {
 
   _renderRow = ({ item }) => {
     const { currentNode } = this.state;
-    const { isShowTreeId = false, selectedItemStyle, itemStyle, treeNodeStyle, selectType = 'single', leafCanBeSelected } = this.props;
+    const { isShowTreeId = false, selectedItemStyle, itemStyle, treeNodeStyle, selectType = 'single', leafCanBeSelected,onlyLeaf } = this.props;
     const { backgroudColor, fontSize, color } = itemStyle && itemStyle;
     const openIcon = treeNodeStyle && treeNodeStyle.openIcon;
     const closeIcon = treeNodeStyle && treeNodeStyle.closeIcon;
@@ -211,7 +211,7 @@ export default class TreeSelect extends Component {
       const isOpen = this.state.nodesStatus && this.state.nodesStatus.get(item && item.id) || false;
       return (
         <View>
-          <TouchableOpacity onPress={(e) => this._onPressNode({ e, item })} >
+          <TouchableOpacity onPress={(e) => onlyLeaf?this._onPressCollapse({ e, item }):this._onPressNode({ e, item })} >
             <View style={{
               flexDirection: 'row',
               backgroundColor: !leafCanBeSelected && isCurrentNode ? selectedBackgroudColor || '#FFEDCE' : backgroudColor || '#fff',

@@ -27,16 +27,16 @@ Example usage:
  首先能够通过如下命令进行安装
 
 ```$xslt
-npm i react-native-treeselect
+npm i @charer/react-native-treeselect
 ```
 然后通过下面命令进行导入：
 ```$xslt
-import TreeSelect from 'react-native-treeselect';
+import TreeSelect from '@charer/react-native-treeselect';
 ```
 如下代码是简单的使用
 
 ```javascript
-import TreeSelect from 'react-native-treeselect';
+import TreeSelect from '@charer/react-native-treeselect';
 
    ...
   render() {
@@ -59,6 +59,7 @@ import TreeSelect from 'react-native-treeselect';
               fontSize: 16,
               color: '#171e99'
             }}
+            onlyLeaf
             onClick={this._onClick}
             onClickLeaf={this._onClickLeaf}
             treeNodeStyle={{
