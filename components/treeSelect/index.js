@@ -197,7 +197,7 @@ export default class TreeSelect extends Component {
 
   _renderRow = ({ item }) => {
     const { currentNode } = this.state;
-    const { isShowTreeId = false, selectedItemStyle, itemStyle, treeNodeStyle, selectType = 'single', leafCanBeSelected,onlyLeaf } = this.props;
+    const { isShowTreeId = false, selectedItemStyle, itemStyle, treeNodeStyle, selectType = 'single', leafCanBeSelected, onlyLeaf, renderRow } = this.props;
     const { backgroudColor, fontSize, color } = itemStyle && itemStyle;
     const openIcon = treeNodeStyle && treeNodeStyle.openIcon;
     const closeIcon = treeNodeStyle && treeNodeStyle.closeIcon;
@@ -211,7 +211,7 @@ export default class TreeSelect extends Component {
       const isOpen = this.state.nodesStatus && this.state.nodesStatus.get(item && item.id) || false;
       return (
         <View>
-          <TouchableOpacity onPress={(e) => onlyLeaf?this._onPressCollapse({ e, item }):this._onPressNode({ e, item })} >
+          <TouchableOpacity onPress={(e) => onlyLeaf ? this._onPressCollapse({ e, item }) : this._onPressNode({ e, item })} >
             <View style={{
               flexDirection: 'row',
               backgroundColor: !leafCanBeSelected && isCurrentNode ? selectedBackgroudColor || '#FFEDCE' : backgroudColor || '#fff',
@@ -220,12 +220,12 @@ export default class TreeSelect extends Component {
               alignItems: 'center'
             }}
             >
-              <TouchableOpacity onPress={(e) => this._onPressCollapse({ e, item })}>{ this._renderTreeNodeIcon(isOpen) }</TouchableOpacity>
+              <TouchableOpacity onPress={(e) => this._onPressCollapse({ e, item })}>{this._renderTreeNodeIcon(isOpen)}</TouchableOpacity>
               {
                 isShowTreeId && <Text style={{ fontSize: 14, marginLeft: 4 }}>{item.id}</Text>
               }
-              <Text style={[styles.textName, !leafCanBeSelected && isCurrentNode ?
-                { fontSize: selectedFontSize, color: selectedColor } : { fontSize, color }]}>{item.name}</Text>
+              {renderRow ? renderRow(item) : <Text style={[styles.textName, !leafCanBeSelected && isCurrentNode ?
+                { fontSize: selectedFontSize, color: selectedColor } : { fontSize, color }]}>{item.name}</Text>}
             </View>
           </TouchableOpacity>
           {
@@ -253,10 +253,10 @@ export default class TreeSelect extends Component {
           alignItems: 'center'
         }}
         >
-          <Text
+          {renderRow ? renderRow(item) : <Text
             style={[styles.textName, isCurrentNode ?
               { fontSize: selectedFontSize, color: selectedColor } : { fontSize, color }]}
-          >{item.name}</Text>
+          >{item.name}</Text>}
         </View>
       </TouchableOpacity>
     );
