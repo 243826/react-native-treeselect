@@ -72,6 +72,10 @@ export default class TreeSelect extends Component {
     let going = true;
 
     const walker = (childrenData, innerId) => {
+      if (childrenData === undefined) {
+        return
+      }
+
       childrenData.forEach(item => {
         if (!going) return;
         stack.push({
@@ -82,9 +86,8 @@ export default class TreeSelect extends Component {
         if (getId(item) === innerId) {
           going = false;
         } else {
-          let children = getChildren(item)
-          if (children) {
-            walker(children, innerId)            
+          if (item.type === 'directory') {
+            walker(getChildren(item), innerId)            
           } else {
             stack.pop()
           }
@@ -215,8 +218,8 @@ export default class TreeSelect extends Component {
     const selectedColor = selectedItemStyle && selectedItemStyle.color;
     const isCurrentNode = selectType === 'multiple' ? currentNode.includes(getId(item)) : (currentNode === getId(item));
 
-    let children =  getChildren(item)
-    if (children && children.length > 0) {
+    if (item.type === 'directory') {
+      let children = getChildren(item)
       const isOpen = this.state.nodesStatus && this.state.nodesStatus.get(item && getId(item)) || false;
       return (
         <View>
@@ -254,6 +257,7 @@ export default class TreeSelect extends Component {
         </View>
       );
     }
+
     return (
       <TouchableOpacity onPress={(e) => this._onClickLeaf({ e, item })}>
         <View style={{
