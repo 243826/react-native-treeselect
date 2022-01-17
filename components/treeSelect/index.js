@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, TextInput, FlatList, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, FlatList, Text, TouchableOpacity } from 'react-native';
+import { CheckBox } from '@react-native-community/checkbox'
 import { breadthFirstRecursion } from '../utils/menutransform';
 
 const styles = StyleSheet.create({
@@ -43,29 +44,30 @@ export default class TreeSelect extends Component {
   };
 
   _initNodesStatus = () => {
-    const { isOpen = false, data, openIds = [], defaultSelectedId = [] } = this.props;
+    const { getId, isOpen = false, data, openIds = [], defaultSelectedId = [] } = this.props;
     const nodesStatus = new Map();
     if (!isOpen) {
       if (openIds && openIds.length) {
         for (let id of openIds) { // eslint-disable-line
           const routes = this._find(data, id);
-          routes.map(parent => nodesStatus.set(parent.id, true));
+          routes.map(parent => nodesStatus.set(getId(parent), true));
         }
       }
       // 设置默认选中时父节点的展开操作
       if (defaultSelectedId && defaultSelectedId.length) {
         for (let id of defaultSelectedId) { // eslint-disable-line
           const routes = this._find(data, id);
-          routes.map(parent => nodesStatus.set(parent.id, true));
+          routes.map(parent => nodesStatus.set(getId(parent), true));
         }
       }
       return nodesStatus;
     }
-    breadthFirstRecursion(data).map(item => nodesStatus.set(item.id, true));
+    breadthFirstRecursion(data).map(item => nodesStatus.set(getId(item), true));
     return nodesStatus;
   };
 
   _find = (data, id) => {
+    let { getId, getChildren } = this.props
     const stack = [];
     let going = true;
 
@@ -73,16 +75,19 @@ export default class TreeSelect extends Component {
       childrenData.forEach(item => {
         if (!going) return;
         stack.push({
-          id: item.id,
+          id: getId(item),
           name: item.name,
-          parentId: item.parentId
+          parent: item.parent
         });
-        if (item['id'] === innerId) {
+        if (getId(item) === innerId) {
           going = false;
-        } else if (item['children']) {
-          walker(item['children'], innerId);
         } else {
-          stack.pop();
+          let children = getChildren(item)
+          if (children) {
+            walker(children, innerId)            
+          } else {
+            stack.pop()
+          }
         }
       });
       if (going) stack.pop();
@@ -93,16 +98,16 @@ export default class TreeSelect extends Component {
   };
 
   _onPressNode = ({ e, item }) => { // eslint-disable-line
-    const { data, selectType, leafCanBeSelected } = this.props;
+    const { data, selectType, leafCanBeSelected, getId } = this.props;
     const { currentNode } = this.state;
-    const routes = this._find(data, item.id);
+    const routes = this._find(data, getId(item));
     this.setState((state) => {
       const nodesStatus = new Map(state.nodesStatus);
-      // nodesStatus.set(item && item.id, !nodesStatus.get(item && item.id)); // toggle
+      // nodesStatus.set(item && getId(item), !nodesStatus.get(item && getId(item))); // toggle
       // 计算currentNode的内容
       if (selectType === 'multiple') {
-        const tempCurrentNode = currentNode.includes(item.id) ?
-          currentNode.filter(nodeid => nodeid !== item.id) : currentNode.concat(item.id)
+        const tempCurrentNode = currentNode.includes(getId(item)) ?
+          currentNode.filter(nodeid => nodeid !== getId(item)) : currentNode.concat(getId(item))
         if (leafCanBeSelected) {
           return { nodesStatus };
         }
@@ -111,7 +116,7 @@ export default class TreeSelect extends Component {
         if (leafCanBeSelected) {
           return { nodesStatus };
         }
-        return { currentNode: item.id, nodesStatus };
+        return { currentNode: getId(item), nodesStatus };
       }
     }, () => {
       const { onClick } = this.props;
@@ -121,16 +126,16 @@ export default class TreeSelect extends Component {
 
   _onPressCollapse = ({ e, item }) => { // eslint-disable-line
     e.stopPropagation();
-    const { data, selectType, leafCanBeSelected } = this.props;
+    const { data, selectType, leafCanBeSelected, getId } = this.props;
     const { currentNode } = this.state;
-    const routes = this._find(data, item.id);
+    const routes = this._find(data, getId(item));
     this.setState((state) => {
       const nodesStatus = new Map(state.nodesStatus);
-      nodesStatus.set(item && item.id, !nodesStatus.get(item && item.id)); // toggle
+      nodesStatus.set(item && getId(item), !nodesStatus.get(item && getId(item))); // toggle
       // 计算currentNode的内容
       if (selectType === 'multiple') {
-        const tempCurrentNode = currentNode.includes(item.id) ?
-          currentNode.filter(nodeid => nodeid !== item.id) : currentNode.concat(item.id)
+        const tempCurrentNode = currentNode.includes(getId(item)) ?
+          currentNode.filter(nodeid => nodeid !== getId(item)) : currentNode.concat(getId(item))
         if (leafCanBeSelected) {
           return { nodesStatus };
         }
@@ -139,7 +144,7 @@ export default class TreeSelect extends Component {
         if (leafCanBeSelected) {
           return { nodesStatus };
         }
-        return { currentNode: item.id, nodesStatus };
+        return { currentNode: getId(item), nodesStatus };
       }
     }, () => {
       const { onClick } = this.props;
@@ -148,21 +153,20 @@ export default class TreeSelect extends Component {
   };
 
   _onClickLeaf = ({ e, item }) => { // eslint-disable-line
-    const { onClickLeaf, onClick, selectType, leafCanBeSelected } = this.props;
-    const { data } = this.props;
+    const { onClickLeaf, onClick, selectType, leafCanBeSelected, getId, data } = this.props;
     const { currentNode } = this.state;
-    const routes = this._find(data, item.id);
+    const routes = this._find(data, getId(item));
     this.setState((state) => {
       // 计算currentNode的内容
       if (selectType === 'multiple') {
-        const tempCurrentNode = currentNode.includes(item.id) ?
-          currentNode.filter(nodeid => nodeid !== item.id) : currentNode.concat(item.id)
+        const tempCurrentNode = currentNode.includes(getId(item)) ?
+          currentNode.filter(nodeid => nodeid !== getId(item)) : currentNode.concat(getId(item))
         return {
           currentNode: tempCurrentNode,
         };
       } else {
         return {
-          currentNode: item.id
+          currentNode: getId(item)
         };
       }
     }, () => {
@@ -195,9 +199,13 @@ export default class TreeSelect extends Component {
       <View style={[styles.collapseIcon, collapseIcon]} />;
   };
 
+  _keyExtractor = (item, i) => this.props.getId(item);
+
+  _setToggleChekbox = (value) => {};
+
   _renderRow = ({ item }) => {
     const { currentNode } = this.state;
-    const { isShowTreeId = false, selectedItemStyle, itemStyle, treeNodeStyle, selectType = 'single', leafCanBeSelected, onlyLeaf, renderRow } = this.props;
+    const { isShowTreeId = false, selectedItemStyle, itemStyle, treeNodeStyle, selectType = 'single', leafCanBeSelected, onlyLeaf, renderRow, getId, getChildren } = this.props;
     const { backgroudColor, fontSize, color } = itemStyle && itemStyle;
     const openIcon = treeNodeStyle && treeNodeStyle.openIcon;
     const closeIcon = treeNodeStyle && treeNodeStyle.closeIcon;
@@ -205,40 +213,43 @@ export default class TreeSelect extends Component {
     const selectedBackgroudColor = selectedItemStyle && selectedItemStyle.backgroudColor;
     const selectedFontSize = selectedItemStyle && selectedItemStyle.fontSize;
     const selectedColor = selectedItemStyle && selectedItemStyle.color;
-    const isCurrentNode = selectType === 'multiple' ? currentNode.includes(item.id) : (currentNode === item.id);
+    const isCurrentNode = selectType === 'multiple' ? currentNode.includes(getId(item)) : (currentNode === getId(item));
 
-    if (item && item.children && item.children.length) {
-      const isOpen = this.state.nodesStatus && this.state.nodesStatus.get(item && item.id) || false;
+    let children =  getChildren(item)
+    if (children && children.length > 0) {
+      const isOpen = this.state.nodesStatus && this.state.nodesStatus.get(item && getId(item)) || false;
       return (
         <View>
           <TouchableOpacity onPress={(e) => onlyLeaf ? this._onPressCollapse({ e, item }) : this._onPressNode({ e, item })} >
             <View style={{
               flexDirection: 'row',
-              backgroundColor: !leafCanBeSelected && isCurrentNode ? selectedBackgroudColor || '#FFEDCE' : backgroudColor || '#fff',
+              backgroundColor: !leafCanBeSelected && isCurrentNode ? selectedBackgroudColor || '#fff' : backgroudColor || '#fff',
               marginBottom: 2,
-              height: 50,
+              height: 20,
               alignItems: 'center'
             }}
             >
               <TouchableOpacity onPress={(e) => this._onPressCollapse({ e, item })}>{this._renderTreeNodeIcon(isOpen)}</TouchableOpacity>
               {
-                isShowTreeId && <Text style={{ fontSize: 14, marginLeft: 4 }}>{item.id}</Text>
+                isShowTreeId && <Text style={{ fontSize: 14, marginLeft: 4 }}>{getId(item)}</Text>
               }
+              
               {renderRow ? renderRow(item) : <Text style={[styles.textName, !leafCanBeSelected && isCurrentNode ?
                 { fontSize: selectedFontSize, color: selectedColor } : { fontSize, color }]}>{item.name}</Text>}
             </View>
           </TouchableOpacity>
           {
-            !isOpen ? null :
+            isOpen ? 
               <FlatList
-                keyExtractor={(childrenItem, i) => i.toString()}
+                keyExtractor={this._keyExtractor}
                 style={{ flex: 1, paddingLeft: 15 }}
                 onEndReachedThreshold={0.01}
                 {...this.props}
-                data={item.children}
+                data={children}
                 extraData={this.state}
                 renderItem={this._renderRow}
-              />
+              /> :
+              null
           }
         </View>
       );
@@ -247,9 +258,9 @@ export default class TreeSelect extends Component {
       <TouchableOpacity onPress={(e) => this._onClickLeaf({ e, item })}>
         <View style={{
           flexDirection: 'row',
-          backgroundColor: isCurrentNode ? selectedBackgroudColor || '#FFEDCE' : backgroudColor || '#fff',
+          backgroundColor: isCurrentNode ? selectedBackgroudColor || '#fff' : backgroudColor || '#fff',
           marginBottom: 2,
-          height: 50,
+          height: 20,
           alignItems: 'center'
         }}
         >
@@ -296,19 +307,18 @@ export default class TreeSelect extends Component {
   //     </View>
   //   );
   // }
+
   render() {
-    const { data } = this.props;
     return (
       <View style={styles.container}>
         {/*{*/}
         {/* {this._renderSearchBar()} */}
         {/*}*/}
         <FlatList
-          keyExtractor={(item, i) => i.toString()}
+          keyExtractor={this._keyExtractor}
           style={{ flex: 1 }}
           onEndReachedThreshold={0.01}
           {...this.props}
-          data={data}
           extraData={this.state}
           renderItem={this._renderRow}
         />

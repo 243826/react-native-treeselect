@@ -11,11 +11,10 @@ export const breadthFirstRecursion = (treeData, params) => {
         childrenName: params && params.childrenName ? params.childrenName : 'children',
     };
     let childrenNodes = [],
-        children = params.childrenName,
         nodes = treeData;
     for (let item in treeData) {
-        if (treeData[item][children]) {
-            let temp = treeData[item][children];
+        let children = item.children()
+        if (children) {
             childrenNodes = childrenNodes.concat(temp);
         }
     }
