@@ -25,5 +25,12 @@
   "bugs": {
     "url": "https://github.com/tvsj/react-native-treeselect/issues"
   },
-  "homepage": "https://github.com/tvsj/react-native-treeselect#readme"
+  "homepage": "https://github.com/tvsj/react-native-treeselect#readme",
+  "devDependencies": {
+    "@types/jest": "^27.4.0",
+    "@types/react": "^17.0.38",
+    "@types/react-native": "^0.66.15",
+    "@types/react-test-renderer": "^17.0.1",
+    "typescript": "^4.5.5"
+  }
 }
