@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, FlatList, Text, TouchableOpacity, ListRenderItem, ListRenderItemInfo, GestureResponderEvent } from 'react-native';
+import { StyleSheet, View, FlatList, Text, TouchableOpacity, ListRenderItem, ListRenderItemInfo, GestureResponderEvent, TextStyle, StyleProp } from 'react-native';
 import { TreeItem, TreeSelectProps } from '../..';
-import { breadthFirstRecursion } from '../utils/menutransform';
 
 const styles = StyleSheet.create({
   container: {
@@ -9,7 +8,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   textName: {
-    fontSize: 14,
+    fontSize: 16,
     marginLeft: 5
   },
   contentContainer: {
@@ -27,163 +26,89 @@ const styles = StyleSheet.create({
 type OnEventType = { e: GestureResponderEvent, item: TreeItem }
 
 type StateType = {
-  nodesStatus: Map<string, boolean>
-  currentNode: string | string[] | null// figure this type out
+  expansionStatus: Map<string, boolean>
+  selectionStatus: Map<string, boolean>
 }
 export default class TreeSelect extends Component<TreeSelectProps, StateType> {
-  private routes : Omit<TreeItem, "children">[]
-  constructor(props : TreeSelectProps) {
+  private routes: Omit<TreeItem, "children">[]
+  constructor(props: TreeSelectProps) {
     super(props);
     this.routes = [];
     this.state = {
-      nodesStatus: this._initNodesStatus(),
-      currentNode: this._initCurrentNode()
+      expansionStatus: this._initExpansionStatus(),
+      selectionStatus: this._initSelectionStatus()
     };
   }
 
-  _initCurrentNode = () => {
-    const { defaultSelectedId, selectType } = this.props;
-    if (selectType === 'multiple') {
-      return defaultSelectedId || [];
+  _initSelectionStatus = () => {
+    const { selectIds, rejectIds } = this.props;
+    let map = new Map()
+
+    if (selectIds) {
+      selectIds.forEach(id => map.set(id, true))
     }
-    return defaultSelectedId && defaultSelectedId[0] || null;
+
+    if (rejectIds) {
+      rejectIds.forEach(id => map.set(id, false))
+    }
+
+    return map
   };
 
-  _initNodesStatus = () => {
-    const { getId, isOpen = false, data, openIds = [], defaultSelectedId = [] } = this.props;
-    const nodesStatus = new Map();
-    if (!isOpen) {
-      if (openIds && openIds.length) {
-        for (let id of openIds) { // eslint-disable-line
-          const routes = this._find(data, id);
-          routes.map(parent => nodesStatus.set(getId(parent), true));
-        }
-      }
-      // 设置默认选中时父节点的展开操作
-      if (defaultSelectedId && defaultSelectedId.length) {
-        for (let id of defaultSelectedId) { // eslint-disable-line
-          const routes = this._find(data, id);
-          routes.map(parent => nodesStatus.set(getId(parent), true));
-        }
-      }
-      return nodesStatus;
+  _initExpansionStatus = () => {
+    const { openIds } = this.props
+
+    let map = new Map()
+
+    if (openIds) {
+      openIds.forEach(id => map.set(id, true))
     }
-    breadthFirstRecursion(data).map(item => nodesStatus.set(getId(item), true));
-    return nodesStatus;
+
+    return map
   };
 
-  _find = (data : TreeItem[], id : unknown) : Omit<TreeItem, "children">[] => {
-    let { getId, getChildren } = this.props
-    const stack : TreeItem[] = [];
-    let going = true;
-
-    const walker = (childrenData : TreeItem[], innerId : unknown) => {
-      if (childrenData === undefined) {
-        return
-      }
-
-      childrenData.forEach(item => {
-        if (!going) return;
-        stack.push(item);
-        if (getId(item) === innerId) {
-          going = false;
+  _onPressNode = ({ item }: OnEventType) => { // eslint-disable-line
+    const { getId } = this.props
+    this.setState((state) => {
+      const { selectionStatus } = state
+      const id = getId(item)
+      if (selectionStatus.has(id)) {
+        /* let's find out if we can delete the status */
+        const isSelected = selectionStatus.get(id)
+        const isParentSelected = this.getSelectedStatus(item.parent)
+        if (isSelected != isParentSelected) {
+          selectionStatus.delete(id)
         } else {
-          if (item.type === 'folder') {
-            walker(getChildren(item), innerId)            
-          } else {
-            stack.pop()
-          }
+          selectionStatus.set(id, isSelected? false: true)
         }
-      });
-      if (going) stack.pop();
-    };
-
-    walker(data, id);
-    return stack;
-  };
-
-  _onPressNode = ({ e, item } : OnEventType ) => { // eslint-disable-line
-    const { data, selectType, leafCanBeSelected, getId } = this.props
-    const { currentNode } = this.state;
-    const routes = this._find(data, getId(item));
-    this.setState((state) => {
-      const nodesStatus = new Map(state.nodesStatus);
-      // nodesStatus.set(item && getId(item), !nodesStatus.get(item && getId(item))); // toggle
-      // 计算currentNode的内容
-      if (selectType === 'multiple') {
-        const currentNodeArray = currentNode as string[]
-        const tempCurrentNode = currentNodeArray.includes(getId(item)) ?
-          currentNodeArray.filter(nodeid => nodeid !== getId(item)) : currentNodeArray.concat(getId(item))
-        if (leafCanBeSelected) {
-          return { nodesStatus } as Pick<StateType, 'nodesStatus'>;
-        }
-        return { currentNode: tempCurrentNode, nodesStatus };
       } else {
-        if (leafCanBeSelected) {
-          return { nodesStatus } ;
-        }
-        return { currentNode: getId(item), nodesStatus } ;
+        const isSelected = this.getSelectedStatus(item)
+        selectionStatus.set(id, isSelected ? false : true)
       }
-    }, () => {
-      const { onClick } = this.props;
-      onClick && onClick({ item, routes, currentNode: this.state.currentNode });
+      return { selectionStatus }
     });
   };
 
-  _onPressCollapse = ({ e, item } : OnEventType ) => { // eslint-disable-line
+  /**
+   * changes the opened/closed status of the node
+   * @param param0 
+   */
+  _onPressCollapse = ({ e, item }: OnEventType) => { // eslint-disable-line
     e.stopPropagation();
-    const { data, selectType, leafCanBeSelected, getId } = this.props;
-    const { currentNode } = this.state;
-    const routes = this._find(data, getId(item));
+    const { getId } = this.props;
     this.setState((state) => {
-      const nodesStatus = new Map(state.nodesStatus);
-      nodesStatus.set(item && getId(item), !nodesStatus.get(item && getId(item))); // toggle
-      // 计算currentNode的内容
-      if (selectType === 'multiple') {
-        const currentNodeArray = currentNode as string[]
-        const tempCurrentNode = currentNodeArray.includes(getId(item)) ?
-          currentNodeArray.filter(nodeid => nodeid !== getId(item)) : currentNodeArray.concat(getId(item))
-        if (leafCanBeSelected) {
-          return { nodesStatus } as Pick<StateType, 'nodesStatus'>;
-        }
-        return { currentNode: tempCurrentNode, nodesStatus };
-      } else {
-        if (leafCanBeSelected) {
-          return { nodesStatus };
-        }
-        return { currentNode: getId(item), nodesStatus };
+      const nodesStatus = new Map(state.expansionStatus);
+      nodesStatus.set(getId(item), !nodesStatus.get(getId(item))); // toggle
+      if (nodesStatus.get(getId(item))) {
+        /* prefetch the children as we are shortly going to display them */
+        this.props.getChildren(item)
       }
-    }, () => {
-      const { onClick } = this.props;
-      // onClick && onClick({ item, routes, currentNode: this.state.currentNode });
+
+      return { expansionStatus: nodesStatus }
     });
   };
 
-  _onClickLeaf = ({ item } : OnEventType ) => { // eslint-disable-line
-    const { onClickLeaf, onClick, selectType, getId, data } = this.props;
-    const { currentNode } = this.state;
-    const routes = this._find(data, getId(item));
-    this.setState((state) => {
-      // 计算currentNode的内容
-      if (selectType === 'multiple') {
-        const currentNodeArray : string[] = currentNode as string[]
-        const tempCurrentNode = currentNodeArray.includes(getId(item)) ?
-        currentNodeArray.filter(nodeid => nodeid !== getId(item)) : currentNodeArray.concat(getId(item))
-        return {
-          currentNode: tempCurrentNode,
-        };
-      } else {
-        return {
-          currentNode: getId(item)
-        };
-      }
-    }, () => {
-      onClick && onClick({ item, routes, currentNode: this.state.currentNode });
-      onClickLeaf && onClickLeaf({ item, routes});
-    });
-  };
-
-  _renderTreeNodeIcon = (isOpen : boolean) => {
+  _renderTreeNodeIcon = (isOpen: boolean) => {
     const { isShowTreeId = false, selectedItemStyle, itemStyle, treeNodeStyle } = this.props;
     const collapseIcon = isOpen ? {
       borderRightWidth: 5,
@@ -207,27 +132,48 @@ export default class TreeSelect extends Component<TreeSelectProps, StateType> {
       <View style={[styles.collapseIcon, collapseIcon]} />;
   };
 
-  _keyExtractor = (item : TreeItem, i : number ) => this.props.getId(item);
+  _keyExtractor = (item: TreeItem, i: number) => this.props.getId(item);
 
-  _renderRow = ({ item } : ListRenderItemInfo<TreeItem>) => {
-    const { currentNode } = this.state;
-    const { isShowTreeId = false, selectedItemStyle, itemStyle, selectType = 'single', leafCanBeSelected, onlyLeaf, renderRow, getId, getChildren } = this.props;
-    const { backgroundColor, fontSize, color } = itemStyle && itemStyle;
+  componentWillUnmount() {
+    if (this.props.setSelectedIds !== undefined) {
+      const { selectionStatus: currentNode } = this.state
+      this.props.setSelectedIds(currentNode)
+    }
+  }
 
-    const selectedBackgroundColor = selectedItemStyle?.backgroundColor;
-    const selectedFontSize = selectedItemStyle?.fontSize;
-    const selectedColor = selectedItemStyle?.color;
-    const isCurrentNode = selectType === 'multiple' ? (currentNode as string[]).includes(getId(item)) : (currentNode === getId(item));
+  getSelectedStatus(node: TreeItem) {
+    const { selectionStatus } = this.state;
+    while (node != undefined) {
+      let id = this.props.getId(node)
+      if (selectionStatus.has(id)) {
+        return selectionStatus.get(id)
+      }
+      node = node.parent
+    }
+
+    return undefined
+  }
+
+  _renderRow = ({ item }: ListRenderItemInfo<TreeItem>) => {
+    const { isShowTreeId = false, selectedItemStyle, itemStyle, leafCanBeSelected, renderRow, getId, getChildren } = this.props;
+    const { backgroundColor, fontSize, color } = itemStyle && itemStyle as TextStyle || {};
+
+    const selectedItemStyleTS = selectedItemStyle as TextStyle
+    const selectedBackgroundColor = selectedItemStyleTS?.backgroundColor;
+    const selectedFontSize = selectedItemStyleTS?.fontSize;
+    const selectedColor = selectedItemStyleTS?.color;
+
+    let isSelected = this.getSelectedStatus(item)
 
     if (item.type === 'folder') {
       let children = getChildren(item)
-      const isOpen = this.state.nodesStatus && this.state.nodesStatus.get(item && getId(item)) || false;
+      const isOpen = this.state.expansionStatus.get(getId(item)) || false;
       return (
         <View>
-          <TouchableOpacity onPress={(e) => onlyLeaf ? this._onPressCollapse({ e, item }) : this._onPressNode({ e, item })} >
+          <TouchableOpacity onPress={(e) => this._onPressNode({ e, item })} >
             <View style={{
               flexDirection: 'row',
-              backgroundColor: !leafCanBeSelected && isCurrentNode ? selectedBackgroundColor || '#fff' : backgroundColor || '#fff',
+              backgroundColor: !leafCanBeSelected && isSelected ? selectedBackgroundColor || '#fff' : backgroundColor || '#fff',
               marginBottom: 2,
               height: 24,
               alignItems: 'center'
@@ -235,15 +181,15 @@ export default class TreeSelect extends Component<TreeSelectProps, StateType> {
             >
               <TouchableOpacity onPress={(e) => this._onPressCollapse({ e, item })}>{this._renderTreeNodeIcon(isOpen)}</TouchableOpacity>
               {
-                isShowTreeId && <Text style={{ fontSize: 14, marginLeft: 4 }}>{getId(item)}</Text>
+                isShowTreeId && <Text style={{ fontSize: 16, marginLeft: 4 }}>{getId(item)}</Text>
               }
-              
-              {renderRow ? renderRow(item) : <Text style={[styles.textName, !leafCanBeSelected && isCurrentNode ?
+
+              {renderRow ? renderRow(item) : <Text style={[styles.textName, !leafCanBeSelected && isSelected ?
                 { fontSize: selectedFontSize, color: selectedColor } : { fontSize, color }]}>{item.name}</Text>}
             </View>
           </TouchableOpacity>
           {
-            isOpen ? 
+            isOpen ?
               <FlatList
                 keyExtractor={this._keyExtractor}
                 style={{ flex: 1, paddingLeft: 15 }}
@@ -260,17 +206,17 @@ export default class TreeSelect extends Component<TreeSelectProps, StateType> {
     }
 
     return (
-      <TouchableOpacity onPress={(e) => this._onClickLeaf({ e, item })}>
+      <TouchableOpacity onPress={(e) => this._onPressNode({ e, item })}>
         <View style={{
           flexDirection: 'row',
-          backgroundColor: isCurrentNode ? selectedBackgroundColor || '#fff' : backgroundColor || '#fff',
+          backgroundColor: isSelected ? selectedBackgroundColor || '#fff' : backgroundColor || '#fff',
           marginBottom: 2,
           height: 24,
           alignItems: 'center'
         }}
         >
           {renderRow ? renderRow(item) : <Text
-            style={[styles.textName, isCurrentNode ?
+            style={[styles.textName, isSelected ?
               { fontSize: selectedFontSize, color: selectedColor } : { fontSize, color }]}
           >{item.name}</Text>}
         </View>

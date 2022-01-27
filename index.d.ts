@@ -4,11 +4,12 @@ import { StyleProp, TextStyle, View } from 'react-native';
 export type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
 
 export interface TreeItem {
-	id: unknown;
+	id: string;
 	name: string;
-	parent: string;
-	children?: TreeItem[];
-	type: 'folder' | 'file'
+	parent: TreeItem;
+	children?: TreeItem[]
+	type: 'folder' | 'file',
+	promise: unknown
 }
 
 export interface LeafClickProps {
@@ -18,10 +19,10 @@ export interface LeafClickProps {
 
 export interface TreeSelectProps {
 	data: TreeItem[];
-	onClick?: (o : {item : TreeItem, routes : Omit<TreeItem, "children">[], currentNode: string | string[] | null}) => void;
+	getId: (item : TreeItem) => string 
+	getChildren: (item : TreeItem) => TreeItem[] | undefined
 	onClickLeaf?: (p: LeafClickProps) => void;
-	isOpen?: boolean;
-	openIds?: TreeItem['id'][];
+	setSelectedIds?: (map : Map<string, boolean>) => void;
 	isShowTreeId?: boolean;
 	itemStyle?: StyleProp<TextStyle>;
 	selectedItemStyle?: StyleProp<TextStyle>;
@@ -30,12 +31,11 @@ export interface TreeSelectProps {
 		closeIcon?: ReactElement;
 	};
 	selectType?: 'single' | 'multiple'
-	defaultSelectedId?: string[]
-	getId: (item : TreeItem) => string 
-	getChildren: (item : TreeItem) => TreeItem[]
+	openIds?: string[];
+	selectIds?: string[]
+	rejectIds?: string[]
 	leafCanBeSelected?: boolean
 	renderRow?: (item : TreeItem) => View
-	onlyLeaf?: boolean
 }
 
 declare class TreeSelect extends Component<TreeSelectProps, {}> {}
