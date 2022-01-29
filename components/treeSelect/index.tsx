@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, FlatList, Text, TouchableOpacity, ListRenderItem, ListRenderItemInfo, GestureResponderEvent, TextStyle, StyleProp } from 'react-native';
+import { StyleSheet, View, FlatList, Text, TouchableOpacity, ListRenderItemInfo, GestureResponderEvent, TextStyle } from 'react-native';
 import { TreeItem, TreeSelectProps } from '../..';
 
 const styles = StyleSheet.create({
@@ -41,15 +41,15 @@ export default class TreeSelect extends Component<TreeSelectProps, StateType> {
   }
 
   _initSelectionStatus = () => {
-    const { selectIds, rejectIds } = this.props;
+    const { selectedIds, rejectedIds } = this.props;
     let map = new Map()
 
-    if (selectIds) {
-      selectIds.forEach(id => map.set(id, true))
+    if (selectedIds) {
+      selectedIds.forEach(id => map.set(id, true))
     }
 
-    if (rejectIds) {
-      rejectIds.forEach(id => map.set(id, false))
+    if (rejectedIds) {
+      rejectedIds.forEach(id => map.set(id, false))
     }
 
     return map
@@ -195,7 +195,7 @@ export default class TreeSelect extends Component<TreeSelectProps, StateType> {
                 style={{ flex: 1, paddingLeft: 15 }}
                 onEndReachedThreshold={0.01}
                 {...this.props}
-                data={children}
+                data={children as TreeItem[]}
                 extraData={this.state}
                 renderItem={this._renderRow}
               /> :

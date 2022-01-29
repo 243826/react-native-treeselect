@@ -20,7 +20,7 @@ export interface LeafClickProps {
 export interface TreeSelectProps {
 	data: TreeItem[];
 	getId: (item : TreeItem) => string 
-	getChildren: (item : TreeItem) => TreeItem[] | undefined
+	getChildren: (item : TreeItem) => TreeItem[] | Promise<TreeItem[]>
 	onClickLeaf?: (p: LeafClickProps) => void;
 	setSelectedIds?: (map : Map<string, boolean>) => void;
 	isShowTreeId?: boolean;
@@ -32,8 +32,8 @@ export interface TreeSelectProps {
 	};
 	selectType?: 'single' | 'multiple'
 	openIds?: string[];
-	selectIds?: string[]
-	rejectIds?: string[]
+	selectedIds?: string[]
+	rejectedIds?: string[]
 	leafCanBeSelected?: boolean
 	renderRow?: (item : TreeItem) => View
 }
