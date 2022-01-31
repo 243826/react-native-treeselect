@@ -35,36 +35,36 @@ export default class TreeSelect extends Component<TreeSelectProps, StateType> {
     super(props);
     this.routes = [];
     this.state = {
-      expansionStatus: this._initExpansionStatus(),
-      selectionStatus: this._initSelectionStatus()
+      expansionStatus: new Map(),
+      selectionStatus: new Map()
     };
+
+    this.#initExpansionStatus()
+    this.#initSelectionStatus()
+
   }
 
-  _initSelectionStatus = () => {
-    const { selectedIds, rejectedIds } = this.props;
-    let map = new Map()
-
-    if (selectedIds) {
-      selectedIds.forEach(id => map.set(id, true))
+  #initSelectionStatus = () => {
+    const { getIdSelection } = this.props
+    if (getIdSelection) {
+      getIdSelection()
+        .then(map => {
+          this.setState(state => {
+            return { selectionStatus: map }
+          })
+        })
     }
-
-    if (rejectedIds) {
-      rejectedIds.forEach(id => map.set(id, false))
-    }
-
-    return map
   };
 
-  _initExpansionStatus = () => {
-    const { openIds } = this.props
-
-    let map = new Map()
-
-    if (openIds) {
-      openIds.forEach(id => map.set(id, true))
-    }
-
-    return map
+  #initExpansionStatus = () => {
+    const { getOpenIds } = this.props;
+    (getOpenIds === undefined? Promise.resolve([]): getOpenIds())
+      .then(openIds => {
+        const map = openIds.reduce((map, id) => (map.set(id, true), map), new Map())
+        this.setState((state) => {
+          return { expansionStatus: map }
+        })
+      })
   };
 
   _onPressNode = ({ item }: OnEventType) => { // eslint-disable-line
@@ -135,9 +135,9 @@ export default class TreeSelect extends Component<TreeSelectProps, StateType> {
   _keyExtractor = (item: TreeItem, i: number) => this.props.getId(item);
 
   componentWillUnmount() {
-    if (this.props.setSelectedIds !== undefined) {
-      const { selectionStatus: currentNode } = this.state
-      this.props.setSelectedIds(currentNode)
+    const { setIdSelection } = this.props
+    if (setIdSelection !== undefined) {
+      setIdSelection(this.state.selectionStatus)
     }
   }
 

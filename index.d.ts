@@ -22,7 +22,9 @@ export interface TreeSelectProps {
 	getId: (item : TreeItem) => string 
 	getChildren: (item : TreeItem) => TreeItem[] | Promise<TreeItem[]>
 	onClickLeaf?: (p: LeafClickProps) => void;
-	setSelectedIds?: (map : Map<string, boolean>) => void;
+	setIdSelection?: (map : Map<string, boolean>) => void
+	getIdSelection?: () => Promise<Map<string, boolean>>
+	getOpenIds?: () => Promise<string[]>
 	isShowTreeId?: boolean;
 	itemStyle?: StyleProp<TextStyle>;
 	selectedItemStyle?: StyleProp<TextStyle>;
@@ -31,9 +33,6 @@ export interface TreeSelectProps {
 		closeIcon?: ReactElement;
 	};
 	selectType?: 'single' | 'multiple'
-	openIds?: string[];
-	selectedIds?: string[]
-	rejectedIds?: string[]
 	leafCanBeSelected?: boolean
 	renderRow?: (item : TreeItem) => View
 }
