@@ -20,8 +20,18 @@ const styles = StyleSheet.create({
     height: 0,
     marginRight: 2,
     borderStyle: 'solid',
+  },
+  button: {
+    marginBottom: 20,
+    padding: 30
+  },
+  space: {
+    width: 20, // or whatever size you need
+    height: 20,
   }
+
 });
+
 
 type OnEventType = { e: GestureResponderEvent, item: TreeItem }
 

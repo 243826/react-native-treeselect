@@ -1,5 +1,5 @@
 {
-  "name": "@charer/react-native-treeselect",
+  "name": "react-native-treeselect",
   "version": "1.0.5",
   "description": "select tree",
   "main": "index.js",
